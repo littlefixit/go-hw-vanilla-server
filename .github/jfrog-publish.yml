@@ -1,8 +1,12 @@
 name: Build image and upload to container repository, update helm values to point to new image
 
 on:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
   push:
-    branches: [ dev ]
+    branches: [ dev ]  
 
 env:
   REGISTRY: penngamestudios.1password.com
