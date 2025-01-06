@@ -11,7 +11,7 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "Hello world!")
+		fmt.Fprint(w, "Hello world! This is v0.0.2.")
 	})
 
 	http.Handle("/", router)
