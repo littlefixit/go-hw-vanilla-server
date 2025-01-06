@@ -88,8 +88,8 @@ jobs:
         with:
           file: docker/Dockerfile.helloworld
           push: true
-          tags:
-          - ${{ env.JFROG_REGISTRY }}/pgs-docker-images/${{ env.COMPONENT_NAME }}:latest
-          - ${{ env.JFROG_REGISTRY }}/pgs-docker-images/${{ env.COMPONENT_NAME }}:${{ env.BRANCH_NAME }}
-          - ${{ env.JFROG_REGISTRY }}/pgs-docker-images/${{ env.COMPONENT_NAME }}:${{ env.BRANCH_NAME }}-${{ env.COMPONENT_VERSION }}
-          - ${{ env.JFROG_REGISTRY }}/pgs-docker-images/${{ env.COMPONENT_NAME }}:${{ env.BRANCH_NAME }}-${{ env.COMPONENT_VERSION }}-${{ env.GITHUB_SHA_SHORT }}
+          tags: |
+            ${{ env.JFROG_REGISTRY }}/pgs-docker-images/${{ env.COMPONENT_NAME }}:latest
+            ${{ env.JFROG_REGISTRY }}/pgs-docker-images/${{ env.COMPONENT_NAME }}:${{ env.BRANCH_NAME }}
+            ${{ env.JFROG_REGISTRY }}/pgs-docker-images/${{ env.COMPONENT_NAME }}:${{ env.BRANCH_NAME }}-${{ env.COMPONENT_VERSION }}
+            ${{ env.JFROG_REGISTRY }}/pgs-docker-images/${{ env.COMPONENT_NAME }}:${{ env.BRANCH_NAME }}-${{ env.COMPONENT_VERSION }}-${{ env.GITHUB_SHA_SHORT }}
