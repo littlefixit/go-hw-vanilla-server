@@ -9,7 +9,7 @@ on:
     branches: [ dev ]  
 
 env:
-  REGISTRY: penngamestudios.1password.com
+  OP_SIGNIN_ADDR: penngamestudios.1password.com
   VAULT: PGS-API-OTHER
   COMPONENT_REPO: ${{ github.repository }}
   HELMCHART_REPO: "littlefixit/ods-helm-charts"
@@ -35,7 +35,7 @@ jobs:
           export-env: true
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_TOKEN }}
-          SECRET: op://${{ vars.REGISTRY }}/PGS-API-OTHER/PGS-API-TEST
+          SECRET: op://${{ env.OP_SIGNIN_ADDR }}/PGS-API-OTHER/PGS-API-TEST
 
       - name: Print masked secret
         run: 'echo "Secret: $SECRET"'
