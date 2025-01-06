@@ -1,0 +1,38 @@
+name: Build image and upload to container repository, update helm values to point to new image
+
+on:
+  push:
+    branches: [ dev ]
+
+env:
+  REGISTRY: penngamestudios.1password.com
+  VAULT: PGS-API-OTHER
+  COMPONENT_REPO: ${{ github.repository }}
+  HELMCHART_REPO: "littlefixit/ods-helm-charts"
+
+  # This should match the directory in $DEPLOY_REPO where the helm chart values file lives
+  APP_NAME: "go-hw-vanilla-server"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4     
+
+      - name: Load secret
+        uses: 1password/load-secrets-action@v2
+        with:
+          # Export loaded secrets as environment variables
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_TOKEN }}
+          SECRET: op://${{ vars.REGISTRY }}/PGS-API-OTHER/PGS-API-TEST
+
+      - name: Print masked secret
+        run: 'echo "Secret: $SECRET"'
+        # Prints: Secret: ***
