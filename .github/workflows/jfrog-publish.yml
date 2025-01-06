@@ -43,8 +43,9 @@ jobs:
         with:
           export-env: false
         env:
-          PGS_API_TEST: op://${{ env.OP_VAULT_NAME }}/PGS-API-TEST          
+          USERNAME: op://${{ env.OP_VAULT_NAME }}/PGS-API-TEST/username
+          PASSWORD: op://${{ env.OP_VAULT_NAME }}/PGS-API-TEST/credential
 
       - name: Print masked secret
-        run: 'echo "Secret: ${{ steps.fetch-secrets.outputs.PGS_API_TEST }}"'
-        # Prints: Secret PGS_API_TEST: ***
+        run: 'echo "Secret: ${{ steps.fetch-secrets.outputs.USERNAME }} ${{ steps.fetch-secrets.outputs.PASSWORD }}"'
+        # Prints: "Secret: *** ***"
