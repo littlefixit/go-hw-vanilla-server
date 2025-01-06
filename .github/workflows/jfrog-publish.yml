@@ -27,15 +27,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4     
 
-      - name: Load secret
+      - name: Configure 1Password Service Account
+        uses: 1password/load-secrets-action/configure@v2
+        with:
+          # Persist the 1Password Service Account Authorization token
+          # for next steps.
+          # Keep in mind that every single step in the job is now
+          # able to access the token.
+          service-account-token: ${{ secrets.OP_TOKEN }}
+
+
+      - name: Fetch 1Password Secrets
+        id: fetch-secrets
         uses: 1password/load-secrets-action@v2
         with:
-          # Export loaded secrets as environment variables
-          export-env: true
+          export-env: false
         env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_TOKEN }}
-          PGS_API_TEST: op://${{ env.OP_VAULT_NAME }}/PGS-API-TEST
+          PGS_API_TEST: op://${{ env.OP_VAULT_NAME }}/PGS-API-TEST          
 
       - name: Print masked secret
-        run: 'echo "Secret: $PGS_API_TEST"'
+        run: 'echo "Secret: ${{ steps.fetch-secrets.outputs.PGS_API_TEST }}"'
         # Prints: Secret PGS_API_TEST: ***
