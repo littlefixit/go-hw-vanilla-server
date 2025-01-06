@@ -9,9 +9,12 @@ on:
     branches: [ dev ]  
 
 env:  
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }} 
+
   OP_VAULT_NAME: PGS-API-OTHER
   COMPONENT_REPO: ${{ github.repository }}
   HELMCHART_REPO: "littlefixit/ods-helm-charts"
+  JFROG_REGISTRY: pgs.jfrog.io
 
   # This should match the directory in $DEPLOY_REPO where the helm chart values file lives
   APP_NAME: "go-hw-vanilla-server"
@@ -26,6 +29,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4     
+      
+      - name: Get Short Hash
+        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+
+      - name: Get Version
+        run: echo "COMPONENT_VERSION=$(cat version.json | jq .version --raw-output)" >> $GITHUB_ENV
 
       - name: Configure 1Password Service Account
         uses: 1password/load-secrets-action/configure@v2
@@ -43,9 +52,40 @@ jobs:
         with:
           export-env: false
         env:
-          USERNAME: op://${{ env.OP_VAULT_NAME }}/PGS-API-TEST/username
-          PASSWORD: op://${{ env.OP_VAULT_NAME }}/PGS-API-TEST/credential
+          JFROG_USER: op://${{ env.OP_VAULT_NAME }}/gha-jfrog-credentials/username
+          JFROG_PASS: op://${{ env.OP_VAULT_NAME }}/gha-jfrog-credentials/password
 
       - name: Print masked secret
-        run: 'echo "Secret: ${{ steps.fetch-secrets.outputs.USERNAME }} ${{ steps.fetch-secrets.outputs.PASSWORD }}"'
-        # Prints: "Secret: *** ***"
+        run: 'echo "Secret: ${{ steps.fetch-secrets.outputs.JFROG_USER }} ${{ steps.fetch-secrets.outputs.JFROG_PASS }}"'
+
+      - name: Print BVH tag
+        run: 'echo "${{ env.JFROG_REGISTRY }}/${{ env.COMPONENT_REPO }}:${{ env.BRANCH_NAME }}-${{ env.COMPONENT_VERSION }}-${{ env.GITHUB_SHA_SHORT }}"'      
+
+      - name: Login to JFrog 🐸  
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.JFROG_REGISTRY }}
+          username: ${{ steps.fetch-secrets.outputs.JFROG_USER }}
+          password: ${{ steps.fetch-secrets.outputs.JFROG_PASS }}
+
+      - name: Set up Docker Context for Buildx
+        id: buildx-context
+        run: |
+          docker context create builders
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: latest
+          endpoint: builders
+
+      # - name: Build and push 🐳
+      #   id: docker_build
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     push: true
+      #     tags: 
+      #       - ${{ env.JFROG_REGISTRY }}/${{ env.COMPONENT_REPO }}:latest
+      #       - ${{ env.JFROG_REGISTRY }}/${{ env.COMPONENT_REPO }}:${{ env.BRANCH_NAME }}
+      #       - ${{ env.JFROG_REGISTRY }}/${{ env.COMPONENT_REPO }}:${{ env.BRANCH_NAME }}-${{ env.COMPONENT_VERSION }}
+      #       - ${{ env.JFROG_REGISTRY }}/${{ env.COMPONENT_REPO }}:${{ env.BRANCH_NAME }}-${{ env.COMPONENT_VERSION }}-${{ env.GITHUB_SHA_SHORT }}
