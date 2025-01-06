@@ -1,0 +1,14 @@
+FROM golang:1.23.1 AS build
+WORKDIR /root/
+RUN echo '[url "ssh://git@github.com"] insteadOf = https://github.com' >> .gitconfig
+COPY . .
+ARG BRANCH
+RUN chmod 777 build.sh
+RUN ./build.sh ${BRANCH} helloworld
+
+FROM alpine:3.15.0
+COPY --from=build /root/dist/helloworld .
+RUN chmod 777 helloworld
+RUN adduser --disabled-password helloworld
+USER helloworld
+CMD ["sh", "-c", "./helloworld"]
